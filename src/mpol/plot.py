@@ -91,7 +91,8 @@ def get_residual_image(model, u, v, V, weights, robust=0.5):
     )
     im_resid, _ = resid_imager.get_dirty_image(weighting="briggs", 
                                                robust=robust, 
-                                               unit='Jy/arcsec^2'
+                                               unit='Jy/arcsec^2',
+                                               check_visibility_scatter=False
                                                )
     # `get_vis_residuals` has already selected a single channel
     im_resid = np.squeeze(im_resid)
@@ -570,6 +571,7 @@ def crossval_diagnostics_fig(cv, title="", save_prefix=None):
 
 def image_comparison_fig(model, u, v, V, weights, robust=0.5, 
                          clean_fits=None, share_cscale=False, 
+                         stretch='asinh',
                          xzoom=[None, None], yzoom=[None, None],
                          title="",
                          channel=0, 
@@ -643,22 +645,22 @@ def image_comparison_fig(model, u, v, V, weights, robust=0.5,
     )
     dirty_im, dirty_beam = imager.get_dirty_image(weighting="briggs",
                                         robust=robust,
-                                        unit="Jy/arcsec^2")
+                                        unit="Jy/arcsec^2", check_visibility_scatter=False)
     dirty_im = np.squeeze(dirty_im)
-
+    
     # get clean image and beam
     if clean_fits is not None:
         fits_obj = ProcessFitsImage(clean_fits)
         clean_im, clean_im_ext, clean_beam = fits_obj.get_image(beam=True)
 
     # set image colorscales
-    norm_mod = get_image_cmap_norm(mod_im, stretch='asinh')
+    norm_mod = get_image_cmap_norm(mod_im, stretch=stretch)
     if share_cscale:
         norm_dirty = norm_clean = norm_mod
     else:
-        norm_dirty = get_image_cmap_norm(dirty_im, stretch='asinh')
+        norm_dirty = get_image_cmap_norm(dirty_im, stretch=stretch)
         if clean_fits is not None:
-            norm_clean = get_image_cmap_norm(clean_im, stretch='asinh')
+            norm_clean = get_image_cmap_norm(clean_im, stretch=stretch)
     
     # MPoL model image
     plot_image(mod_im, extent=model.icube.coords.img_ext,

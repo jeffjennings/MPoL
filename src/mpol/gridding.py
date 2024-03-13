@@ -645,7 +645,7 @@ class DirtyImager(GridderBase):
             robust (float): If ``weighting='briggs'``, specify a robust value in the range [-2, 2]. ``robust=-2`` approximately corresponds to uniform weighting and ``robust=2`` approximately corresponds to natural weighting.
             taper_function (function reference): a function assumed to be of the form :math:`f(u,v)` which calculates a prefactor in the range :math:`[0,1]` and premultiplies the visibility data. The function must assume that :math:`u` and :math:`v` will be supplied in units of :math:`\mathrm{k}\lambda`. By default no taper is applied.
         """
-
+        
         if taper_function is None:
             tapering_weight = np.ones_like(self.weight)
         else:
@@ -877,6 +877,7 @@ class DirtyImager(GridderBase):
         # check the visibility scatter and flag user if there are issues
         if check_visibility_scatter:
             d = self._check_scatter_error(max_scatter)
+            
             if d["return_status"]:
                 warnings.warn(
                     RuntimeWarning(
@@ -888,6 +889,7 @@ class DirtyImager(GridderBase):
 
         # call _grid_visibilities
         # inputs for weighting will be checked inside _grid_visibilities
+
         self._grid_visibilities(
             weighting=weighting,
             robust=robust,
