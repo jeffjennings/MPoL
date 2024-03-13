@@ -25,7 +25,7 @@ class GriddedDataset(torch.nn.Module):
         weight_gridded (torch double): the weights corresponding to the gridded visibility data, also in a packed format
         mask (torch boolean): a boolean mask to index the non-zero locations of ``vis_gridded`` and ``weight_gridded`` in their packed format.
         nchan (int): the number of channels in the image (default = 1).
-        device (torch.device) : the desired device of the dataset. If ``None``, defaults to current device.
+        device (torch.device) : the desired device of the dataset. If ``None``, defaults to current device. # TODO: this isn't used anywhere
 
     After initialization, the GriddedDataset provides the non-zero cells of the gridded visibilities and weights as a 1D vector via the following instance variables. This means that any individual channel information has been collapsed.
 

@@ -208,6 +208,7 @@ class CrossValidate:
             if hasattr(self._device,'type') and self._device.type == 'cuda': # TODO: confirm which objects need to be passed to gpu
                 model = model.to(self._device)
 
+            # TODO: move outside this script if pass model into CrossValidate (instead of defining it just above)
             if self._start_dirty_image is True:
                 if kk == 0:
                     if self._verbose:
@@ -224,11 +225,13 @@ class CrossValidate:
 
             # create a new optimizer and scheduler for this kfold
             optimizer = torch.optim.Adam(model.parameters(), lr=self._learn_rate)
+            # self._optimizer = torch.optim.SGD(model.parameters(), lr=self._learn_rate, momentum=0.9) # TODO: pass in momentum?
             if self._schedule_factor is None:
                 scheduler = None
             else:
                 scheduler = torch.optim.lr_scheduler.ReduceLROnPlateau(optimizer, mode='min', factor=self._schedule_factor)
 
+            # TODO: pass in train_pars to crossval with these instead
             trainer = TrainTest( 
                 imager=self._imager,
                 optimizer=optimizer,
@@ -433,6 +436,7 @@ class DartboardSplitGridded:
         q_edges (1D numpy array): an array of radial bin edges to set the dartboard cells in :math:`[\mathrm{k}\lambda]`. If ``None``, defaults to 12 log-linearly radial bins stretching from 0 to the :math:`q_\mathrm{max}` represented by ``coords``.
         phi_edges (1D numpy array): an array of azimuthal bin edges to set the dartboard cells in [radians]. If ``None``, defaults to 8 equal-spaced azimuthal bins stretched from :math:`0` to :math:`\pi`.
         seed (int): (optional) numpy random seed to use for the permutation, for reproducibility
+        verbose (bool): whether to print notification messages
 
     Once initialized, iterate through the datasets like
 
@@ -481,6 +485,7 @@ class DartboardSplitGridded:
         # indices of cells in the smallest q bin that also have data
         small_q_idx = [i for i,l in enumerate(self.cell_list) if l[0] == 0]
         # cells in the smallest q bin
+        print('len(small_q)', len(small_q_idx)) # TODO
         self.small_q = self.cell_list[:len(small_q_idx)]
 
         # partition the cell_list into k pieces.

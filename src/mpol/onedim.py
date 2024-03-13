@@ -139,7 +139,8 @@ def radialV(fcube, geom, rescale_flux, chan=0, bins=None):
 
     # if the source is optically thick, rescale the deprojected V(q)
     if rescale_flux: 
-        Vp.real /= np.cos(geom["incl"] * np.pi / 180)
+        Vp.real /= np.cos(geom["incl"] * np.pi / 180) # TODO: also Im(V)?
+        # weights *= np.cos(geom["incl"] * np.pi / 180) ** 2 # TODO: where are weights stored?
 
     # convert back to [k\lambda]
     up /= 1e3

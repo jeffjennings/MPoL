@@ -1,7 +1,7 @@
 import numpy as np
 from astropy.constants import c, k_B
 
-import mpol
+import mpol  # TODO: remove for fit_runner (already in fit.py)
 mpol.enable_logging()
 
 # convert from arcseconds to radians

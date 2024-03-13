@@ -1,7 +1,7 @@
 __version__ = "0.2.0"
 zenodo_record = 10064221
 
-def enable_logging(log_file=None):
+def enable_logging(log_file=None): # TODO: this change is already in fit_runner
     """Turn on internal logging for MPoL
 
     Parameters
