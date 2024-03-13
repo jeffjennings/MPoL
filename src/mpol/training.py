@@ -36,8 +36,13 @@ def train_to_dirty_image(model, imager, robust=0.5, learn_rate=100, niter=1000):
 
     img, beam = imager.get_dirty_image(weighting="briggs",
                                                 robust=robust,
-                                                unit="Jy/arcsec^2")
+                                                unit="Jy/arcsec^2",
+                                                check_visibility_scatter=False)
+
     dirty_image = torch.tensor(img.copy())
+
+    dirty_image = dirty_image.to('cuda:0') # TODO: remove
+
     optimizer = torch.optim.SGD(model.parameters(), lr=learn_rate)
 
     losses = []
@@ -47,14 +52,14 @@ def train_to_dirty_image(model, imager, robust=0.5, learn_rate=100, niter=1000):
         model()
 
         sky_cube = model.icube.sky_cube
-
+        
         lossfunc = torch.nn.MSELoss(reduction="sum")  
         # MSELoss calculates mean squared error (squared L2 norm), so sqrt it
         loss = (lossfunc(sky_cube, dirty_image)) ** 0.5
         losses.append(loss.item())
 
         loss.backward()
-        optimizer.step()            
+        optimizer.step()           
 
     return model
 
@@ -141,8 +146,8 @@ class TrainTest:
                          f"guessing. Initial values: {self._regularizers}")
             
         # generate images of the data using two briggs robust values
-        img1, _ = self._imager.get_dirty_image(weighting='briggs', robust=0.0)
-        img2, _ = self._imager.get_dirty_image(weighting='briggs', robust=0.5)
+        img1, _ = self._imager.get_dirty_image(weighting='briggs', robust=0.0, check_visibility_scatter=False)
+        img2, _ = self._imager.get_dirty_image(weighting='briggs', robust=0.5, check_visibility_scatter=False)
         img1 = torch.from_numpy(img1.copy())
         img2 = torch.from_numpy(img2.copy())
 
@@ -262,7 +267,7 @@ class TrainTest:
         while not self.loss_convergence(np.array(losses)) and count <= self._epochs:
             if self._verbose:
                 print(
-                    "\r  Training: epoch {} of {}".format(count, self._epochs),
+                    f"\r  Training: epoch {count} of {self._epochs}",
                     end="",
                     flush=True,
                 )
@@ -319,6 +324,7 @@ class TrainTest:
                 self._train_figure = (train_fig, train_axes)
 
                 # temporarily store the current model image for use in next call to `train_diagnostics_fig`
+                # TODO: support 'channel' (in TrainTest)
                 old_mod_im = torch2npy(model.icube.sky_cube[0])
                 old_mod_epoch = count * 1
 
@@ -359,7 +365,7 @@ class TrainTest:
         vis = model()
 
         # calculate loss used for a cross-validation score
-        loss = self.loss_eval(vis, dataset)
+        loss = self.loss_eval(vis, dataset, sky_cube=None)
 
         # return loss value
         return loss.item()
