@@ -329,6 +329,39 @@ def get_optimal_image_properties(image_width, u, v):
     return cell_size, npix
 
 
+def get_image_noise_floor(coords, u, v, weights, robust, seed=None):
+    if seed is not None:
+        np.random.seed(seed)
+
+    noise = np.random.standard_normal(weights.shape)
+    noise *= weights ** -0.5
+
+    from mpol.gridding import DirtyImager
+    from mpol.plot import get_image_cmap_norm
+    resid_imager = DirtyImager(
+        coords=coords,
+        uu=u,
+        vv=v,
+        weight=weights,
+        data_re=np.real(noise),
+        data_im=np.imag(noise),
+    )
+    im_resid, _ = resid_imager.get_dirty_image(weighting="briggs", 
+                                               robust=robust, 
+                                               unit='Jy/arcsec^2'
+                                               )
+    # `get_vis_residuals` has already selected a single channel
+    im_resid = np.squeeze(im_resid)
+
+    norm_resid = get_image_cmap_norm(im_resid, 
+                                     stretch='power', 
+                                     gamma=1, 
+                                     symmetric=True
+                                     )
+    
+    return im_resid, norm_resid
+
+
 def sky_gaussian_radians(l, m, a, delta_l, delta_m, sigma_l, sigma_m, Omega):
     r"""
     Calculates a 2D Gaussian on the sky plane with inputs in radians. The Gaussian is centered at ``delta_l, delta_m``, has widths of ``sigma_l, sigma_m``, and is rotated ``Omega`` degrees East of North.
