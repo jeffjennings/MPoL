@@ -356,7 +356,7 @@ class RandomCellSplitGridded:
         nvis = len(self.dataset.vis_indexed)
         nn = int(nvis * 0.01)
         # get the nn-th largest value in weight_indexed
-        w_thresh = np.partition(self.dataset.weight_indexed, -nn)[-nn]
+        w_thresh = np.partition(torch2npy(self.dataset.weight_indexed), -nn)[-nn] # TODO: remove torch2npy
         self._top_nn = torch.argwhere(
             self.dataset.weight_gridded[self.channel] >= w_thresh
         ).T
@@ -470,7 +470,7 @@ class DartboardSplitGridded:
         # 2D mask for any UV cells that contain visibilities
         # in *any* channel
         stacked_mask = torch.any(self.griddedDataset.mask, dim=0)
-
+        stacked_mask = torch2npy(stacked_mask) # TODO
         # get qs, phis from dataset and turn into 1D lists
         qs = self.griddedDataset.coords.packed_q_centers_2D[stacked_mask]
         phis = self.griddedDataset.coords.packed_phi_centers_2D[stacked_mask]
