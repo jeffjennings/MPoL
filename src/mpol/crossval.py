@@ -528,8 +528,10 @@ class DartboardSplitGridded:
             k_list = self.k_split_cell_list.copy()
             if self.k == 1:
                 if self.verbose is True:
-                    logging.info("    DartboardSplitGridded: only 1 k-fold: splitting dataset as ~80/20 train/test")
-                ntest = round(0.2 * len(k_list[0]))
+                #     logging.info("    DartboardSplitGridded: only 1 k-fold: splitting dataset as ~80/20 train/test")
+                # ntest = round(0.2 * len(k_list[0]))
+                    logging.info("    DartboardSplitGridded: only 1 k-fold: splitting dataset as ~99/1 train/test")
+                ntest = round(0.01 * len(k_list[0]))
                 # put ~20% of cells into test set
                 cell_list_test = k_list[0][:ntest]
                 # remove cells in test set from train set
