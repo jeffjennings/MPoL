@@ -244,6 +244,7 @@ class CrossValidate:
 
             # run training 
             loss, loss_history = trainer.train(model, train_set)
+            self._train_set = train_set
 
             # run testing
             all_scores.append(trainer.test(model, test_set))
@@ -253,7 +254,7 @@ class CrossValidate:
             self._train_figure = trainer.train_figure
 
             # collect objects from this kfold to store
-            if self._store_cv_diagnostics:
+            if self._store_cv_diagnostics: # TODO: saving all models can be ~500MB
                 self._diagnostics["models"].append(self._model)
                 self._diagnostics["regularizers"].append(self._regularizers)
                 self._diagnostics["loss_histories"].append(loss_history)                
@@ -273,6 +274,11 @@ class CrossValidate:
     def model(self):
         """For the most recent kfold, trained model (`SimpleNet` class instance)"""
         return self._model
+
+    @property
+    def train_set(self):
+        """For the most recent kfold, trained model (`SimpleNet` class instance)"""
+        return self._train_set
 
     @property
     def regularizers(self):
