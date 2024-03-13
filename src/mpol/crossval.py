@@ -15,6 +15,7 @@ from mpol.precomposed import SimpleNet
 from mpol.training import TrainTest, train_to_dirty_image
 from mpol.plot import split_diagnostics_fig
 from mpol.utils import loglinspace
+from mpol.utils import torch2npy # TODO
 
 class CrossValidate:
     r"""
@@ -200,10 +201,13 @@ class CrossValidate:
             if self._verbose:
                 logging.info("\n  k-fold {} of {}".format(kk, self._kfolds - 1))
 
-            # if hasattr(self._device,'type') and self._device.type == 'cuda': # TODO: confirm which objects need to be passed to gpu
-            #     train_set, test_set = train_set.to(self._device), test_set.to(self._device)
+            if hasattr(self._device,'type') and self._device.type == 'cuda': # TODO: confirm which objects need to be passed to gpu
+                train_set, test_set = train_set.to(self._device), test_set.to(self._device)
 
             model = SimpleNet(coords=self._coords, nchan=self._imager.nchan)
+            if hasattr(self._device,'type') and self._device.type == 'cuda': # TODO: confirm which objects need to be passed to gpu
+                model = model.to(self._device)
+
             if self._start_dirty_image is True:
                 if kk == 0:
                     if self._verbose:
@@ -358,7 +362,8 @@ class RandomCellSplitGridded:
         self.top_mask[self._top_nn[0], self._top_nn[1]] = False
         # use unmasked cells that also have data for splits
         self.split_mask = torch.logical_and(
-            self.dataset.mask[self.channel], self.top_mask
+            # self.dataset.mask[self.channel], self.top_mask
+            self.dataset.mask[self.channel].to('cuda'), self.top_mask.to('cuda') # TODO: remove .to('cuda')
         )
         split_idx = torch.argwhere(self.split_mask).T
 
